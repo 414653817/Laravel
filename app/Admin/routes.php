@@ -11,6 +11,15 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index')->name('admin.home');
-    $router->get('/users', 'UsersController@index')->name('admin.users');
-    $router->get('/products', 'ProductsController@index')->name('admin.products');
+
+    //用户列表
+    $router->get('users', 'UsersController@index')->name('admin.users');
+    //商品列表
+    $router->get('products', 'ProductsController@index')->name('admin.products');
+    //添加商品
+    $router->get('products/create', 'ProductsController@create')->name('admin.products.create');
+    $router->post('products', 'ProductsController@store')->name('admin.products.store');
+    //编辑商品
+    $router->get('products/{product}/edit', 'ProductsController@edit')->name('admin.products.edit');
+    $router->put('products/{product}', 'ProductsController@update')->name('admin.products.update');
 });

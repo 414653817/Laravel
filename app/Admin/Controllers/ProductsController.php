@@ -48,30 +48,19 @@ class ProductsController extends Controller
     public function edit($id, Content $content)
     {
         return $content
-            ->header('Edit')
-            ->description('description')
+            ->header('编辑商品')
             ->body($this->form()->edit($id));
     }
 
-    /**
-     * Create interface.
-     *
-     * @param Content $content
-     * @return Content
-     */
+
     public function create(Content $content)
     {
         return $content
-            ->header('Create')
-            ->description('description')
+            ->header('创建商品')
             ->body($this->form());
     }
 
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
+
     protected function grid()
     {
         $grid = new Grid(new Product);
@@ -138,14 +127,31 @@ class ProductsController extends Controller
     {
         $form = new Form(new Product);
 
-        $form->text('title', 'Title');
-        $form->textarea('description', 'Description');
-        $form->image('image', 'Image');
-        $form->switch('on_sale', 'On sale')->default(1);
-        $form->decimal('rating', 'Rating')->default(5.00);
-        $form->number('sold_count', 'Sold count');
-        $form->number('review_count', 'Review count');
-        $form->decimal('price', 'Price');
+        // 创建一个输入框，第一个参数 title 是模型的字段名，第二个参数是该字段描述
+        $form->text('title', '商品标题')->rules('required');
+        //图片上传框
+        $form->image('image', '封面图片')->rules('required|image');
+
+        //富文本编辑器(此组件被禁用了需要在app/admin/bootstrap.php)
+        $form->editor('description', '详细描述')->rules('required');
+        //单选框
+        $form->radio('on_sale', '上架')->options(['1'=>'是','0'=>'否'])->default('0');
+
+        //直接添加一对多的关联模型
+        $form->hasMany('skus', 'SKU 列表', function (Form\NestedForm $form) {
+            $form->text('title', 'SKU 名称')->rules('required');
+            $form->text('description', 'SKU 描述')->rules('required');
+            $form->text('price', '单价')->rules('required|numeric|min:0.01');
+            $form->text('stock', '剩余库存')->rules('required|integer|min:0');
+        });
+
+        // 定义事件回调，当模型即将保存时会触发这个回调
+        $form->saving(function (Form $form) {
+            //当我们在前端移除一个 SKU 的之后，点击保存按钮时 Laravel-Admin 仍然会将被删除的 SKU 提交上去，
+            //但是会添加一个 _remove_=1(正常为0) 的字段
+            $form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price') ?: 0;
+
+        });
 
         return $form;
     }

@@ -11,6 +11,6 @@ class ProductSku extends Model
     //和商品表关联(属于)
     public function product()
     {
-        $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class);
     }
 }
