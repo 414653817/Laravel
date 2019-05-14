@@ -79,7 +79,7 @@ class ProductsController extends Controller
         $grid->created_at('创建时间');
 
         $grid->actions(function($actions) {
-            $actions->disableView();
+            //$actions->disableView();
             $actions->disableDelete();
         });
 
@@ -103,17 +103,52 @@ class ProductsController extends Controller
     {
         $show = new Show(Product::findOrFail($id));
 
-        $show->id('Id');
-        $show->title('Title');
-        $show->description('Description');
-        $show->image('Image');
-        $show->on_sale('On sale');
-        $show->rating('Rating');
-        $show->sold_count('Sold count');
-        $show->review_count('Review count');
-        $show->price('Price');
-        $show->created_at('Created at');
-        $show->updated_at('Updated at');
+        $show->id('ID');
+        $show->title('商品名称');
+        $show->description('商品描述');
+        $show->image('封面图片')->image();
+        $show->on_sale('是否上架')->as(function($on_sale) {
+            if($on_sale) {
+                return '是';
+            }else {
+                return '否';
+            }
+        });
+        $show->rating('评价')->badge();
+        $show->sold_count('库存');
+        $show->review_count('评分');
+        $show->price('价格');
+        $show->created_at('创建时间');
+
+        //sku信息
+        $show->skus('SKU 信息', function ($sku) {
+
+            //此$sku是一个grid实例
+            $sku->resource('/admin/products');
+
+            $sku->id();
+            $sku->title();
+            $sku->description();
+            $sku->price();
+            $sku->stock();
+            $sku->created_at();
+            $sku->updated_at();
+
+            /*$sku->actions(function($actions) {
+                $actions->disableView();
+                $actions->disableDelete();
+                $actions->disableEdit();
+            });*/
+            $sku->disableActions();
+
+            //取消批量删除
+            $sku->tools(function($tools) {
+                $tools->batch(function($batch) {
+                    $batch->disableDelete();
+                });
+            });
+
+        });
 
         return $show;
     }

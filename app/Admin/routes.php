@@ -22,4 +22,6 @@ Route::group([
     //编辑商品
     $router->get('products/{product}/edit', 'ProductsController@edit')->name('admin.products.edit');
     $router->put('products/{product}', 'ProductsController@update')->name('admin.products.update');
+    //商品详情
+    $router->get('products/{product}', 'ProductsController@show')->name('admin.products.show');
 });
